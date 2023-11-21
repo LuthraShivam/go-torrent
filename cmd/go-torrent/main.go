@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	bencode "github.com/LuthraShivam/go-torrent"
+	bencode "github.com/LuthraShivam/go-torrent/pkg/bencode"
 )
 
 func main() {
@@ -21,6 +21,6 @@ func main() {
 
 	for _, torrentFile := range os.Args[1:] {
 		torrentData := bencode.Decode(torrentFile)
-		fmt.Println(torrentFile)
+		fmt.Println(torrentData.Files)
 	}
 }

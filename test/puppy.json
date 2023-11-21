@@ -1,0 +1,13 @@
+{
+    "announce": "udp://tracker.coppersurfer.tk:6969/announce",
+    "created by": "uTorrent/1870",
+    "creation date": 1462355939,
+    "encoding": "UTF-8",
+    "info": {
+       "length": 124234,
+       "name": "puppy.jpg",
+       "piece length": 16384,
+       "pieces": "<hex>54 E2 6B 8A 2F 84 5F 28 C1 53 11 68 25 B0 CF F0 2B 5D 71 27 42 18 EE D9 A0 3A B0 8D F6 EF 70 22 B6 6A 96 C2 87 FC A7 31 2D 67 22 18 BC 73 28 1B 0F 9A 9B 8C 56 C3 F0 3D 95 68 AF 6D 17 61 9C 6E 46 AF 32 7F FD 85 B0 4E 0D B7 C7 A9 D4 5F 91 1E 22 32 FB FE A4 27 91 77 4F E5 EC 95 2D 3B 04 D7 A2 17 B5 D8 91 9A BA 4C 26 F9 D5 F0 F3 30 1F EB 44 5F 39 B7 ED 09 5C 9D A8 4F E6 68 2C 6E 1A 35 67 D8 28 A9 91 E4 BB 91 2C 95 5C DF B0 A5 25 BC 9A 55 86 E4 19 9E 81 43 07 3E D8 D9 64 66 86 AF</hex>"
+    }
+ }
+ 
