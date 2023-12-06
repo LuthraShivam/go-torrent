@@ -42,23 +42,17 @@ type BencodeTorrentMultiFile struct {
 }
 
 // ////////// Interface functions for above structures
-func (bto BencodeTorrentSingleFile) Unmarshal(torrentPath string) error {
+func (bto *BencodeTorrentSingleFile) Unmarshal(torrentPath string) error {
 	file, err := os.Open(torrentPath)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	bto = BencodeTorrentSingleFile{}
 	err = bencode.Unmarshal(file, &bto)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
-
-	// fmt.Println("SingleFileTorrent Parsing: ///")
-	// fmt.Println(bto.Announce)
-	// fmt.Println(bto.CreationDate)
-	// fmt.Println(bto.Info.Length)
 	return nil
 }
 
@@ -68,7 +62,6 @@ func (bto BencodeTorrentMultiFile) Unmarshal(torrentPath string) error {
 		return err
 	}
 	defer file.Close()
-	bto = BencodeTorrentMultiFile{}
 	err = bencode.Unmarshal(file, &bto)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -87,7 +80,7 @@ func Decode(torrentPath string) (decodedTorrentData, error) {
 	err := decodedData.Unmarshal(torrentPath)
 	if err != nil {
 		fmt.Println(err.Error())
-		return BencodeTorrentSingleFile{}, err
+		return nil, err
 	}
 
 	// if you encounter multi file torrent file
@@ -97,7 +90,7 @@ func Decode(torrentPath string) (decodedTorrentData, error) {
 		err := decodedData.Unmarshal(torrentPath)
 		if err != nil {
 			fmt.Println(err.Error())
-			return BencodeTorrentMultiFile{}, nil
+			return nil, err
 		}
 		fmt.Println(decodedData.Info.Pieces)
 		return &decodedData, nil

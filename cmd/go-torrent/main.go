@@ -27,11 +27,10 @@ func main() {
 			log.Fatalln(err.Error())
 			return
 		}
-		bencodeMultiFileTorrentData, ok := decodedInterface.(bencode.BencodeTorrentSingleFile)
-		if ok {
-			fmt.Println(bencodeMultiFileTorrentData.Announce)
+		if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
+			fmt.Println(decodedData.Announce)
 		} else {
-			fmt.Println("not ok")
+			fmt.Println("type assertion failed")
 		}
 		//fmt.Println(decodedData)
 		// fmt.Println(torrentData)
