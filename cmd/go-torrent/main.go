@@ -20,7 +20,21 @@ func main() {
 	}
 
 	for _, torrentFile := range os.Args[1:] {
-		torrentData := bencode.Decode(torrentFile)
-		fmt.Println(torrentData.Files)
+		fmt.Println(torrentFile)
+
+		decodedInterface, err := bencode.Decode(torrentFile)
+		if err != nil {
+			log.Fatalln(err.Error())
+			return
+		}
+		bencodeMultiFileTorrentData, ok := decodedInterface.(bencode.BencodeTorrentSingleFile)
+		if ok {
+			fmt.Println(bencodeMultiFileTorrentData.Announce)
+		} else {
+			fmt.Println("not ok")
+		}
+		//fmt.Println(decodedData)
+		// fmt.Println(torrentData)
+		// fmt.Println(torrentData.Files[0].Path)
 	}
 }
