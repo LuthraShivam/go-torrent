@@ -1,13 +1,16 @@
 package bencode
 
 import (
+	"bytes"
+	"crypto/sha1"
 	"fmt"
 	"os"
 
+	entities "github.com/LuthraShivam/go-torrent/pkg/entities"
 	bencode "github.com/jackpal/bencode-go"
 )
 
-type decodedTorrentData interface {
+type DecodedTorrentData interface {
 	Unmarshal(string) error
 }
 
@@ -42,6 +45,7 @@ type BencodeTorrentMultiFile struct {
 }
 
 // ////////// Interface functions for above structures
+
 func (bto *BencodeTorrentSingleFile) Unmarshal(torrentPath string) error {
 	file, err := os.Open(torrentPath)
 	if err != nil {
@@ -56,7 +60,7 @@ func (bto *BencodeTorrentSingleFile) Unmarshal(torrentPath string) error {
 	return nil
 }
 
-func (bto BencodeTorrentMultiFile) Unmarshal(torrentPath string) error {
+func (bto *BencodeTorrentMultiFile) Unmarshal(torrentPath string) error {
 	file, err := os.Open(torrentPath)
 	if err != nil {
 		return err
@@ -70,12 +74,36 @@ func (bto BencodeTorrentMultiFile) Unmarshal(torrentPath string) error {
 	return nil
 }
 
+// ////////// Bencode Info hash functions
+
+// To generate Hash, you need the info json segment of the torrent file, and return the hash result.
+// The length of the hash will be 20 bytes
+
+// for single file torrent files
+func (bto *bencodeInfoSingleFile) InfoHash() (entities.SHAHash, error) {
+	var buf bytes.Buffer
+	err := bencode.Marshal(&buf, *bto)
+	if err != nil {
+		return entities.SHAHash{}, nil
+	}
+	hash := sha1.Sum(buf.Bytes())
+	return hash, nil
+}
+
+// for multi-file torrent files
+func (bto *bencodeInfoMultiFile) InfoHash() (entities.SHAHash, error) {
+	var buf bytes.Buffer
+	err := bencode.Marshal(&buf, *bto)
+	if err != nil {
+		return entities.SHAHash{}, nil
+	}
+	hash := sha1.Sum(buf.Bytes())
+	return hash, nil
+}
+
 // ////////// Package functions
 
-/*
-Decode function is responsible for
-*/
-func Decode(torrentPath string) (decodedTorrentData, error) {
+func Decode(torrentPath string) (DecodedTorrentData, error) {
 	decodedData := BencodeTorrentSingleFile{}
 	err := decodedData.Unmarshal(torrentPath)
 	if err != nil {
@@ -92,9 +120,7 @@ func Decode(torrentPath string) (decodedTorrentData, error) {
 			fmt.Println(err.Error())
 			return nil, err
 		}
-		fmt.Println(decodedData.Info.Pieces)
 		return &decodedData, nil
 	}
-	fmt.Println(decodedData.Info.Pieces)
-	return &decodedData, nil
+	return &decodedData, nil // &decodeData to match the interface
 }

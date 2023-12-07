@@ -28,9 +28,16 @@ func main() {
 			return
 		}
 		if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
-			fmt.Println(decodedData.Announce)
+			fmt.Println("Single file torrent file encountered")
+			hash, _ := decodedData.Info.InfoHash()
+			fmt.Println(hash)
+
 		} else {
-			fmt.Println("type assertion failed")
+			if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
+				fmt.Println("Multi file torrent file encountered")
+				hash, _ := decodedData.Info.InfoHash()
+				fmt.Println(hash)
+			}
 		}
 		//fmt.Println(decodedData)
 		// fmt.Println(torrentData)
