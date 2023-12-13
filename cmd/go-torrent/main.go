@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	bencode "github.com/LuthraShivam/go-torrent/pkg/bencode"
+	"github.com/LuthraShivam/go-torrent/pkg/torrent"
 )
 
 func main() {
@@ -16,31 +16,32 @@ func main() {
 		Execution structure: ./<executable> <torrent1> <torrent2> ...
 	*/
 	if len(os.Args) < 2 {
-		log.Fatal("Torrent File not passed. Exiting\n")
+		log.Fatal("Torrent Files not passed. Exiting\n")
 	}
-
-	for _, torrentFile := range os.Args[1:] {
-		fmt.Println(torrentFile)
-
-		decodedInterface, err := bencode.Decode(torrentFile)
-		if err != nil {
-			log.Fatalln(err.Error())
-			return
-		}
-		if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
-			fmt.Println("Single file torrent file encountered")
-			hash, _ := decodedData.Info.InfoHash()
-			fmt.Println(hash)
-
-		} else {
-			if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
-				fmt.Println("Multi file torrent file encountered")
-				hash, _ := decodedData.Info.InfoHash()
-				fmt.Println(hash)
-			}
-		}
-		//fmt.Println(decodedData)
-		// fmt.Println(torrentData)
-		// fmt.Println(torrentData.Files[0].Path)
+	decodedInterfaces, _ := torrent.ParseTorrentFiles(os.Args[1:])
+	for _, dI := range decodedInterfaces {
+		fmt.Println(dI)
 	}
+	// for _, torrentFile := range os.Args[1:] {
+	// 	fmt.Println(torrentFile)
+
+	// 	decodedInterface, err := bencode.Decode(torrentFile)
+	// 	if err != nil {
+	// 		log.Fatalln(err.Error())
+	// 		return
+	// 	}
+	// 	if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
+	// 		fmt.Println("Single file torrent file encountered")
+	// 		hash, _ := decodedData.Info.InfoHash()
+	// 		fmt.Println(hash)
+
+	// 	} else {
+	// 		if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
+	// 			fmt.Println("Multi file torrent file encountered")
+	// 			hash, _ := decodedData.Info.InfoHash()
+	// 			fmt.Println(hash)
+	// 		}
+	// 	}
+
+	// }
 }

@@ -15,18 +15,18 @@ type DecodedTorrentData interface {
 }
 
 // ////////// Decoded torrent data structures
-type bencodeFile struct {
+type BencodeFile struct {
 	Path   []string
 	Length int
 }
-type bencodeInfoMultiFile struct {
+type BencodeInfoMultiFile struct {
 	Pieces      string        `bencode:"pieces"`
 	PieceLength int           `bencode:"piece length"`
 	Name        string        `bencode:"name"`
-	Files       []bencodeFile `bencode:"files"`
+	Files       []BencodeFile `bencode:"files"`
 }
 
-type bencodeInfoSingleFile struct {
+type BencodeInfoSingleFile struct {
 	Pieces      string `bencode:"pieces"`
 	PieceLength int    `bencode:"piece length"`
 	Length      int    `bencode:"length"`
@@ -36,12 +36,12 @@ type bencodeInfoSingleFile struct {
 type BencodeTorrentSingleFile struct {
 	Announce     string                `bencode:"announce"`
 	CreationDate int                   `bencode:"creation date"`
-	Info         bencodeInfoSingleFile `bencode:"info"`
+	Info         BencodeInfoSingleFile `bencode:"info"`
 }
 type BencodeTorrentMultiFile struct {
 	Announce     string               `bencode:"announce"`
 	CreationDate int                  `bencode:"creation date"`
-	Info         bencodeInfoMultiFile `bencode:"info"`
+	Info         BencodeInfoMultiFile `bencode:"info"`
 }
 
 // ////////// Interface functions for above structures
@@ -74,13 +74,13 @@ func (bto *BencodeTorrentMultiFile) Unmarshal(torrentPath string) error {
 	return nil
 }
 
-// ////////// Bencode Info hash functions
+// ////////// Bencode Infohash functions
 
-// To generate Hash, you need the info json segment of the torrent file, and return the hash result.
+// To generate Hash, you need the marshaled value of info section of the torrent file, and return the hash result.
 // The length of the hash will be 20 bytes
 
 // for single file torrent files
-func (bto *bencodeInfoSingleFile) InfoHash() (entities.SHAHash, error) {
+func (bto *BencodeInfoSingleFile) InfoHash() (entities.SHAHash, error) {
 	var buf bytes.Buffer
 	err := bencode.Marshal(&buf, *bto)
 	if err != nil {
@@ -91,7 +91,7 @@ func (bto *bencodeInfoSingleFile) InfoHash() (entities.SHAHash, error) {
 }
 
 // for multi-file torrent files
-func (bto *bencodeInfoMultiFile) InfoHash() (entities.SHAHash, error) {
+func (bto *BencodeInfoMultiFile) InfoHash() (entities.SHAHash, error) {
 	var buf bytes.Buffer
 	err := bencode.Marshal(&buf, *bto)
 	if err != nil {
