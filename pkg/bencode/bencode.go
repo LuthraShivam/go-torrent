@@ -10,6 +10,9 @@ import (
 	bencode "github.com/jackpal/bencode-go"
 )
 
+// All bencoded data structures are stored in this file, as after being Unmarshaled, they will
+// not be used a lot elsewhere.
+
 type DecodedTorrentData interface {
 	Unmarshal(string) error
 }
