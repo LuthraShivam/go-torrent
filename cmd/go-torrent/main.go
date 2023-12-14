@@ -19,29 +19,10 @@ func main() {
 		log.Fatal("Torrent Files not passed. Exiting\n")
 	}
 	decodedInterfaces, _ := torrent.ParseTorrentFiles(os.Args[1:])
-	for _, dI := range decodedInterfaces {
-		fmt.Println(dI)
+	torrentStruct, err := torrent.BuildTorrent(decodedInterfaces[0])
+	if err != nil {
+		fmt.Println("Unable to create torrent file")
 	}
-	// for _, torrentFile := range os.Args[1:] {
-	// 	fmt.Println(torrentFile)
-
-	// 	decodedInterface, err := bencode.Decode(torrentFile)
-	// 	if err != nil {
-	// 		log.Fatalln(err.Error())
-	// 		return
-	// 	}
-	// 	if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
-	// 		fmt.Println("Single file torrent file encountered")
-	// 		hash, _ := decodedData.Info.InfoHash()
-	// 		fmt.Println(hash)
-
-	// 	} else {
-	// 		if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
-	// 			fmt.Println("Multi file torrent file encountered")
-	// 			hash, _ := decodedData.Info.InfoHash()
-	// 			fmt.Println(hash)
-	// 		}
-	// 	}
-
-	// }
+	fmt.Println(torrentStruct.InfoHash)
+	fmt.Println(torrentStruct.Files)
 }

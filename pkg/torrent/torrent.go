@@ -2,6 +2,7 @@ package torrent
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"log"
 
@@ -27,42 +28,70 @@ func ParseTorrentFiles(files []string) ([]bencode.DecodedTorrentData, error) {
 func BuildTorrent(decodedInterface bencode.DecodedTorrentData) (entities.Torrent, error) {
 
 	var peerID [20]byte
+	// we're using a random 20 byte value as the peer_id
 	_, err := rand.Read(peerID[:])
 	if err != nil {
 		return entities.Torrent{}, err
 	}
 
+	// populate torrent ID
 	var torrent entities.Torrent
 	torrent.ID = peerID
 
 	// determining if we are working with a single file torrent or a multi-file torrent
 	if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
-		fmt.Println("Single file torrent file encountered")
-		hash, _ := decodedData.Info.InfoHash()
-		fmt.Println(hash)
+		fmt.Println("BuildTorrent | Single file torrent file encountered")
+		hash, err := decodedData.Info.InfoHash()
+		if err != nil {
+			error := errors.New("BuildTorrent | single file torrent | error while computing infohash")
+			return entities.Torrent{}, error
+		}
+		torrent.Announce = decodedData.Announce
+		torrent.InfoHash = hash
+		torrent.PieceLength = decodedData.Info.PieceLength
+		torrent.Name = decodedData.Info.Name
+		torrent.Pieces = decodedData.Info.Pieces
 
-	} else if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
-		fmt.Println("Multi file torrent file encountered")
-		hash, _ := decodedData.Info.InfoHash()
-		fmt.Println(hash)
+		// populate contents of one file
+		file := entities.File{}
+		file.Length = decodedData.Info.Length
+		filePath := []string{}
+		filePath = append(filePath, decodedData.Info.Name)
+		file.Path = filePath
+
+		// finally add everything into torrent files
+		files := []entities.File{}
+		files = append(files, file)
+		torrent.Files = files
 	} else {
-		fmt.Println("Foo")
+		// multifile torrent
+		if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
+			fmt.Println("BuildTorrent | Multi file torrent file encountered")
+			hash, err := decodedData.Info.InfoHash()
+			if err != nil {
+				error := errors.New("BuildTorrent | multi file torrent | error while computing infohash")
+				return entities.Torrent{}, error
+			}
+			torrent.Announce = decodedData.Announce
+			torrent.InfoHash = hash
+			torrent.PieceLength = decodedData.Info.PieceLength
+			torrent.Name = decodedData.Info.Name
+			torrent.Pieces = decodedData.Info.Pieces
+			files := []entities.File{}
+			// translate bencode files to entities file
+			for _, file := range decodedData.Info.Files {
+				f := entities.File{}
+				f.Length = file.Length
+				f.Path = file.Path
+				files = append(files, f)
+			}
+		}
+		// peers will be populated by a different function
 	}
-	return entities.Torrent{}, nil
+
+	return torrent, nil
 }
 
-func RequestPeersFromTracker(decodedInterface bencode.DecodedTorrentData) {
+func RequestPeersFromTracker() {
 	// determining if we are working with a single file torrent or a multi-file torrent
-	if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentSingleFile); ok {
-		fmt.Println("Single file torrent file encountered")
-		hash, _ := decodedData.Info.InfoHash()
-		fmt.Println(hash)
-
-	} else if decodedData, ok := decodedInterface.(*bencode.BencodeTorrentMultiFile); ok {
-		fmt.Println("Multi file torrent file encountered")
-		hash, _ := decodedData.Info.InfoHash()
-		fmt.Println(hash)
-	} else {
-		fmt.Println("Foo")
-	}
 }
