@@ -25,4 +25,5 @@ func main() {
 	}
 	fmt.Println(torrentStruct.InfoHash)
 	fmt.Println(torrentStruct.Files)
+	torrentStruct.RequestPeersFromTracker()
 }
