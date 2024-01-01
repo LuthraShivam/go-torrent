@@ -3,6 +3,7 @@ package torrent
 import (
 	"crypto/rand"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/LuthraShivam/go-torrent/pkg/bencode"
@@ -20,12 +21,28 @@ type Torrent struct {
 	PieceLength int
 	Files       []File // represents the actual file
 	Name        string
-	Pieces      string
+	PieceHashes [][20]byte
 	Peers       []entities.Peer
 	ID          [20]byte
 }
 
 // ////////// Function Definitions
+
+func SplitPieceHashes(pieces string) ([][20]byte, error) {
+	hashLength := 20
+	buf := []byte(pieces)
+	if len(buf)%hashLength != 0 {
+		err := fmt.Errorf("Received malformed pieces of length: %d", len(buf))
+		return nil, err
+	}
+	numberHashes := len(buf) / hashLength
+	hashes := make([][20]byte, numberHashes)
+	for i := 0; i < numberHashes; i++ {
+		copy(hashes[i][:], buf[i*hashLength:(i+1)*hashLength])
+	}
+	return hashes, nil
+}
+
 func ParseTorrentFiles(files []string) ([]bencode.DecodedTorrentData, error) {
 	decodedInterfaces := make([]bencode.DecodedTorrentData, len(files))
 	for i, torrentFile := range files {
@@ -65,8 +82,11 @@ func BuildTorrent(decodedInterface bencode.DecodedTorrentData) (Torrent, error) 
 		torrent.InfoHash = hash
 		torrent.PieceLength = decodedData.Info.PieceLength
 		torrent.Name = decodedData.Info.Name
-		torrent.Pieces = decodedData.Info.Pieces
-
+		pieceHashes, err := SplitPieceHashes(decodedData.Info.Pieces)
+		if err != nil {
+			return Torrent{}, err
+		}
+		torrent.PieceHashes = pieceHashes
 		// populate contents of one file
 		file := File{}
 		file.Length = decodedData.Info.Length
@@ -91,7 +111,11 @@ func BuildTorrent(decodedInterface bencode.DecodedTorrentData) (Torrent, error) 
 			torrent.InfoHash = hash
 			torrent.PieceLength = decodedData.Info.PieceLength
 			torrent.Name = decodedData.Info.Name
-			torrent.Pieces = decodedData.Info.Pieces
+			pieceHashes, err := SplitPieceHashes(decodedData.Info.Pieces)
+			if err != nil {
+				return Torrent{}, err
+			}
+			torrent.PieceHashes = pieceHashes
 			files := []File{}
 			// translate bencode files to entities file
 			for _, file := range decodedData.Info.Files {

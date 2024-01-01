@@ -22,8 +22,9 @@ func main() {
 	torrentStruct, err := torrent.BuildTorrent(decodedInterfaces[0])
 	if err != nil {
 		fmt.Println("Unable to create torrent file")
+		return
 	}
-	fmt.Println(torrentStruct.InfoHash)
-	fmt.Println(torrentStruct.Files)
 	torrentStruct.RequestPeersFromTracker()
+	fmt.Println(torrentStruct.Peers)
+
 }
